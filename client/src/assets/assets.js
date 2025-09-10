@@ -19,11 +19,11 @@ import freeBreakfastIcon from './freeBreakfastIcon.svg'
 import roomServiceIcon from './roomServiceIcon.svg'
 import mountainIcon from './mountainIcon.svg'
 import poolIcon from './poolIcon.svg'
-// import homeIcon from './homeIcon.svg'
+import homeIcon from './homeIcon.svg'
 import closeIcon from './closeIcon.svg'
-// import locationFilledIcon from './locationFilledIcon.svg'
-// import heartIcon from './heartIcon.svg'
-// import badgeIcon from './badgeIcon.svg'
+import locationFilledIcon from './locationFilledIcon.svg'
+import heartIcon from './heartIcon.svg'
+import badgeIcon from './badgeIcon.svg'
 import menuIcon from './menuIcon.svg'
 // import closeMenu from './closeMenu.svg'
 //import guestsIcon from './guestsIcon.svg'
@@ -67,10 +67,10 @@ export const assets = {
     mountainIcon,
     poolIcon,
     closeIcon,
-    // homeIcon,
-    // locationFilledIcon,
-    // heartIcon,
-    // badgeIcon,
+    homeIcon,
+    locationFilledIcon,
+    heartIcon,
+    badgeIcon,
     menuIcon,
     // closeMenu,
     // guestsIcon,
@@ -114,12 +114,12 @@ export const facilityIcons = {
 };
 
 // // For Room Details Page
-// export const roomCommonData = [
-//     { icon: assets.homeIcon, title: "Clean & Safe Stay", description: "A well-maintained and hygienic space just for you." },
-//     { icon: assets.badgeIcon, title: "Enhanced Cleaning", description: "This host follows Staybnb's strict cleaning standards." },
-//     { icon: assets.locationFilledIcon, title: "Excellent Location", description: "90% of guests rated the location 5 stars." },
-//     { icon: assets.heartIcon, title: "Smooth Check-In", description: "100% of guests gave check-in a 5-star rating." },
-// ];
+export const roomCommonData = [
+    { icon: assets.homeIcon, title: "Clean & Safe Stay", description: "A well-maintained and hygienic space just for you." },
+    { icon: assets.badgeIcon, title: "Enhanced Cleaning", description: "This host follows Staybnb's strict cleaning standards." },
+    { icon: assets.locationFilledIcon, title: "Excellent Location", description: "90% of guests rated the location 5 stars." },
+    { icon: assets.heartIcon, title: "Smooth Check-In", description: "100% of guests gave check-in a 5-star rating." },
+];
 
 // // User Dummy Data
 export const userDummyData = {
