@@ -1,11 +1,12 @@
-import React, { use } from 'react';
+import React from 'react';
 import Navbar from './components/Navbar';
 import { BrowserRouter as Router ,Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Footer from './components/Footer';
-import AllRooms from './AllRooms';
+import AllRooms from './pages/AllRooms';
+import RoomDetails from './pages/RoomDetails';
 
 const App = () => {
 
@@ -20,6 +21,7 @@ const App = () => {
           <Route path='/login' element={<Login/>}/>
           <Route path="/signup" element={<Signup />}/>
           <Route path="/rooms" element={<AllRooms />}/>
+          <Route path="/rooms/:id" element={<RoomDetails />}/>
         </Routes>
       </div>
       <Footer />
@@ -27,4 +29,4 @@ const App = () => {
   )
 }
 
-export default App
+export default App;

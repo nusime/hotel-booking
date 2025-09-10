@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation, Link, useNavigate } from 'react-router-dom';
+import {useLocation, NavLink, useNavigate, Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import UserDropdown from './useDropdown.jsx';
@@ -59,10 +59,13 @@ const Navbar = () => {
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-4 lg:gap-8">
                     {navLinks.map((link, i) => (
-                        <Link key={i} href={link.path} className= 'group flex flex-col gap-0.5 text-white'>
+                        <NavLink key={i} to={link.path} className= {({isActive}) =>
+                            `group flex flex-col gap-0.5 ${isActive?
+                            "underline underline-offset-4 font-semibold" : "text-white"
+                        } `}>
                             {link.name}
                             <div className= 'h-0.5 w-0 group-hover:w-full transition-all duration-300' />
-                        </Link>
+                        </NavLink>
                     ))}
                     <Link to='/dashboard'>
                         <button className= 'border px-4 py-1 text-sm font-light rounded-full cursor-pointer text-white transition-all'>
@@ -105,9 +108,13 @@ const Navbar = () => {
                     </button>
 
                     {navLinks.map((link, i) => (
-                        <Link key={i} href={link.path} onClick={() => setIsMenuOpen(false)}>
+                        <NavLink key={i} to={link.path} onClick={() => setIsMenuOpen(false)}
+                        className= {({isActive}) =>
+                            `group flex flex-col gap-0.5 ${isActive?
+                            "underline font-semibold" : ""
+                        } `}>
                             {link.name}
-                        </Link>
+                        </NavLink>
                     ))}
 
                     <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
