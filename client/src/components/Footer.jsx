@@ -2,6 +2,10 @@ import React from 'react'
 import { assets } from '../assets/assets';
 
 const Footer = () => {
+    const hideFooter = location.pathname === '/login' || location.pathname === '/signup';
+    if (hideFooter) {
+        return null; // Don't render the Navbar on login or signup pages
+    }
   return (
     <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32 pt-10'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>

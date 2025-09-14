@@ -1,6 +1,6 @@
 import logo from './logos.jpg'
 import searchIcon from './searchIcon.svg'
-// import userIcon from './userIcon.svg'
+import userIcon from './userIcon.svg'
 import calenderIcon from './calenderIcon.svg'
 import googleIcon from './googleIcon.png'
 import appleIcon from './appleIcon.png'
@@ -26,13 +26,13 @@ import heartIcon from './heartIcon.svg'
 import badgeIcon from './badgeIcon.svg'
 import menuIcon from './menuIcon.svg'
 // import closeMenu from './closeMenu.svg'
-//import guestsIcon from './guestsIcon.svg'
+import guestsIcon from './guestsIcon.svg'
 import roomImg1 from './roomImg1.png'
 import roomImg2 from './roomImg2.png'
 import roomImg3 from './roomImg3.png'
 import roomImg4 from './roomImg4.png'
 import roomImg5 from './roomImg5.png'
-// import regImage from './regImage.png'
+import regImage from './regImage.png'
 import exclusiveOfferCardImg1 from "./exclusiveOfferCardImg1.png";
 import exclusiveOfferCardImg2 from "./exclusiveOfferCardImg2.png";
 import exclusiveOfferCardImg3 from "./exclusiveOfferCardImg3.png";
@@ -51,7 +51,7 @@ export const assets = {
     appleIcon,
     loginImg,
     signupImg,
-    // userIcon,
+    userIcon,
     calenderIcon,
     locationIcon,
     starIconFilled,
@@ -73,8 +73,8 @@ export const assets = {
     badgeIcon,
     menuIcon,
     // closeMenu,
-    // guestsIcon,
-    // regImage,
+    guestsIcon,
+    regImage,
     // addIcon,
     // dashboardIcon,
     // listIcon,
@@ -222,56 +222,56 @@ export const roomsDummyData = [
 
 
 // // User Bookings Dummy Data
-// export const userBookingsDummyData = [
-//     {
-//         "_id": "67f76839994a731e97d3b8ce",
-//         "user": userDummyData,
-//         "room": roomsDummyData[1],
-//         "hotel": hotelDummyData,
-//         "checkInDate": "2025-04-30T00:00:00.000Z",
-//         "checkOutDate": "2025-05-01T00:00:00.000Z",
-//         "totalPrice": 299,
-//         "guests": 1,
-//         "status": "pending",
-//         "paymentMethod": "Stripe",
-//         "isPaid": true,
-//         "createdAt": "2025-04-10T06:42:01.529Z",
-//         "updatedAt": "2025-04-10T06:43:54.520Z",
-//         "__v": 0
-//     },
-//     {
-//         "_id": "67f76829994a731e97d3b8c3",
-//         "user": userDummyData,
-//         "room": roomsDummyData[0],
-//         "hotel": hotelDummyData,
-//         "checkInDate": "2025-04-27T00:00:00.000Z",
-//         "checkOutDate": "2025-04-28T00:00:00.000Z",
-//         "totalPrice": 399,
-//         "guests": 1,
-//         "status": "pending",
-//         "paymentMethod": "Pay At Hotel",
-//         "isPaid": false,
-//         "createdAt": "2025-04-10T06:41:45.873Z",
-//         "updatedAt": "2025-04-10T06:41:45.873Z",
-//         "__v": 0
-//     },
-//     {
-//         "_id": "67f76810994a731e97d3b8b4",
-//         "user": userDummyData,
-//         "room": roomsDummyData[3],
-//         "hotel": hotelDummyData,
-//         "checkInDate": "2025-04-11T00:00:00.000Z",
-//         "checkOutDate": "2025-04-12T00:00:00.000Z",
-//         "totalPrice": 199,
-//         "guests": 1,
-//         "status": "pending",
-//         "paymentMethod": "Pay At Hotel",
-//         "isPaid": false,
-//         "createdAt": "2025-04-10T06:41:20.501Z",
-//         "updatedAt": "2025-04-10T06:41:20.501Z",
-//         "__v": 0
-//     }
-// ]
+export const userBookingsDummyData = [
+    {
+        "_id": "67f76839994a731e97d3b8ce",
+        "user": userDummyData,
+        "room": roomsDummyData[1],
+        "hotel": hotelDummyData,
+        "checkInDate": "2025-04-30T00:00:00.000Z",
+        "checkOutDate": "2025-05-01T00:00:00.000Z",
+        "totalPrice": 299,
+        "guests": 1,
+        "status": "pending",
+        "paymentMethod": "Stripe",
+        "isPaid": true,
+        "createdAt": "2025-04-10T06:42:01.529Z",
+        "updatedAt": "2025-04-10T06:43:54.520Z",
+        "__v": 0
+    },
+    {
+        "_id": "67f76829994a731e97d3b8c3",
+        "user": userDummyData,
+        "room": roomsDummyData[0],
+        "hotel": hotelDummyData,
+        "checkInDate": "2025-04-27T00:00:00.000Z",
+        "checkOutDate": "2025-04-28T00:00:00.000Z",
+        "totalPrice": 399,
+        "guests": 1,
+        "status": "pending",
+        "paymentMethod": "Pay At Hotel",
+        "isPaid": false,
+        "createdAt": "2025-04-10T06:41:45.873Z",
+        "updatedAt": "2025-04-10T06:41:45.873Z",
+        "__v": 0
+    },
+    {
+        "_id": "67f76810994a731e97d3b8b4",
+        "user": userDummyData,
+        "room": roomsDummyData[3],
+        "hotel": hotelDummyData,
+        "checkInDate": "2025-04-11T00:00:00.000Z",
+        "checkOutDate": "2025-04-12T00:00:00.000Z",
+        "totalPrice": 199,
+        "guests": 1,
+        "status": "pending",
+        "paymentMethod": "Pay At Hotel",
+        "isPaid": false,
+        "createdAt": "2025-04-10T06:41:20.501Z",
+        "updatedAt": "2025-04-10T06:41:20.501Z",
+        "__v": 0
+    }
+]
 
 // // Dashboard Dummy Data
 // export const dashboardDummyData = {

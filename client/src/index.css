@@ -3,8 +3,8 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #2563eb;
-  --color-secondary: #FBBF24 ;
+  --color-primary: #54201c;
+  --color-secondary: #49B9FF/50 ;
 }
 
 *{
@@ -13,4 +13,19 @@
 
 .font-playfair {
   font-family: Playfair !important;
+}
+
+@keyframes dropdown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.15s ease-out forwards;
 }
