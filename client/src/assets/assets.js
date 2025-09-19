@@ -36,12 +36,12 @@ import regImage from './regImage.png'
 import exclusiveOfferCardImg1 from "./exclusiveOfferCardImg1.png";
 import exclusiveOfferCardImg2 from "./exclusiveOfferCardImg2.png";
 import exclusiveOfferCardImg3 from "./exclusiveOfferCardImg3.png";
-// import addIcon from "./addIcon.svg";
-// import dashboardIcon from "./dashboardIcon.svg";
-// import listIcon from "./listIcon.svg";
-// import uploadArea from "./uploadArea.svg";
-// import totalBookingIcon from "./totalBookingIcon.svg";
-// import totalRevenueIcon from "./totalRevenueIcon.svg";
+import addIcon from "./addIcon.svg";
+import dashboardIcon from "./dashboardIcon.svg";
+import listIcon from "./listIcon.svg";
+import uploadArea from "./uploadArea.svg";
+import totalBookingIcon from "./totalBookingIcon.svg";
+import totalRevenueIcon from "./totalRevenueIcon.svg";
 
 
 export const assets = {
@@ -75,12 +75,12 @@ export const assets = {
     // closeMenu,
     guestsIcon,
     regImage,
-    // addIcon,
-    // dashboardIcon,
-    // listIcon,
-    // uploadArea,
-    // totalBookingIcon,
-    // totalRevenueIcon,
+    addIcon,
+    dashboardIcon,
+    listIcon,
+    uploadArea,
+    totalBookingIcon,
+    totalRevenueIcon,
 }
 
 export const cities = [
@@ -124,8 +124,8 @@ export const roomCommonData = [
 // // User Dummy Data
 export const userDummyData = {
     "_id": "user_2unqyL4diJFP1E3pIBnasc7w8hP",
-    "username": "Great Stack",
-    "email": "user.greatstack@gmail.com",
+    "username": "Nusi",
+    "email": "nusi12.851@gmail.com",
     "image": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvdXBsb2FkZWQvaW1nXzJ2N2c5YVpSSEFVYVUxbmVYZ2JkSVVuWnFzWSJ9",
     "role": "hotelOwner",
     "createdAt": "2025-03-25T09:29:16.367Z",
@@ -273,12 +273,12 @@ export const userBookingsDummyData = [
     }
 ]
 
-// // Dashboard Dummy Data
-// export const dashboardDummyData = {
-//     "totalBookings": 3,
-//     "totalRevenue": 897,
-//     "bookings": userBookingsDummyData
-// }
+// Dashboard Dummy Data
+export const dashboardDummyData = {
+    "totalBookings": 3,
+    "totalRevenue": 897,
+    "bookings": userBookingsDummyData
+}
 
 // // --------- SVG code for Book Icon------
 // /* 
