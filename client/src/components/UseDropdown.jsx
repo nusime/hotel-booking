@@ -72,8 +72,11 @@ const UserDropdown = () => {
                     <div className="flex flex-col py-2 divide-y divide-gray-100">
                         <button
                             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            onClick={() => alert("Go to manage account page")}
-                        >
+                            onClick={() => {
+                                navigate("/account");  
+                                setOpen(false);       
+                            }}
+                                                    >
                             <UserCircleIcon className="h-5 w-5 text-gray-500" />
                             Manage Account
                         </button>
