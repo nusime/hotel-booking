@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import { useSignUp } from '@clerk/clerk-react';
+import React, {useState, useEffect} from 'react';
+import { useSignUp, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logos.jpg';
 import signupImg from '../assets/signupImg.png'
@@ -9,7 +9,14 @@ import appleIcon from '../assets/appleIcon.png';
 
 const Signup = () => {
     const { signUp, isLoaded, setActive } = useSignUp();
+    const { user } = useUser();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     const [firstName, setFirstName ] = useState('');
     const [lastName, setLastName ] = useState('');
@@ -18,6 +25,7 @@ const Signup = () => {
     const [termsAccepted, setTermsAccepted ] = useState(false);
     const [error, setError ] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
 
     const handleSubmit = async (e) => {
@@ -33,20 +41,37 @@ const Signup = () => {
             return;
         }
 
+        setLoading(true);
+
         try {
-            await signUp.create({
-                firstName,
-                lastName,
+            // Create the signup without firstName/lastName initially
+            const result = await signUp.create({
                 emailAddress,
                 password,
             });
 
-            await signUp.prepareEmailAddressVerification({ strategy: 'email_code'});
-            navigate('/verify-email');
+            // Try to update the user profile after creation if possible
+            try {
+                if (firstName || lastName) {
+                    await signUp.update({
+                        unsafeMetadata: {
+                            firstName: firstName.trim(),
+                            lastName: lastName.trim()
+                        }
+                    });
+                }
+            } catch (updateError) {
+                console.log('Could not set name during signup, will be available after verification');
+            }
 
-            if (signUp.status === 'complete' && signUp.createdSessionId) {
-                await setActive({ session: signUp.createdSessionId });
-                navigate('/dashboard');
+            // Check if signup is complete (some configurations don't require email verification)
+            if (result.status === 'complete') {
+                await setActive({ session: result.createdSessionId });
+                navigate('/');
+            } else {
+                // Prepare email verification and navigate to verification page
+                await signUp.prepareEmailAddressVerification({ strategy: 'email_code'});
+                navigate('/verify-email');
             }
         } catch (err) {
             console.error('Error during sign up:', JSON.stringify(err, null, 2));
@@ -55,6 +80,8 @@ const Signup = () => {
             } else {
                 setError('An unexpected error occurred. Please try again.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -63,9 +90,10 @@ const Signup = () => {
             return;
         }
         setError('');
+        setLoading(true);
 
         try {
-            await signUp.authenticateWithRedirect({ 
+            await signUp.authenticateWithRedirect({
                 strategy: `oauth_${strategy}`,
                 redirectUrl: '/sso-callback',
                 redirectUrlComplete: '/dashboard'
@@ -73,6 +101,7 @@ const Signup = () => {
         } catch (err) {
             console.error(`Error with ${strategy} sign up:`, JSON.stringify(err, null, 2));
             setError(`Failed to sign up with ${strategy}. Please try again.`);
+            setLoading(false);
         }
     };
   return (
@@ -194,10 +223,17 @@ const Signup = () => {
                             I agree to the <a href="#" className='text-[#316E6A] hover:underline'>Term & Condition</a>
                         </label>
                     </div>
-                    <button type='submit' 
-                    className='w-full bg-[#316E6A] text-white py-3 rounded-lg font-semibold transition duration-300 focus:outline-none'
-                    disabled={!isLoaded}>
-                        Sign Up
+                    <button type='submit'
+                    className='w-full bg-[#316E6A] text-white py-3 rounded-lg font-semibold transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center'
+                    disabled={!isLoaded || loading}>
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Creating Account...
+                            </>
+                        ) : (
+                            'Sign Up'
+                        )}
                     </button>
                 </form>
                 <p className='text-center text-gray-600 text-sm mt-6'>
@@ -214,13 +250,15 @@ const Signup = () => {
                 </div>
 
                 <div className='flex space-x-4 justify-center'>
-                    <button onClick={() => handleOAuth('google')} className='flex items-center justify-center px-6 py-3 border 
-                    border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition duration-300 focus:outline-none'>
+                    <button onClick={() => handleOAuth('google')}
+                    className='flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+                    disabled={loading}>
                         <img src={googleIcon} alt="Google" className='h-5 w-5 mr-2' />
                         Google
                     </button>
-                    <button onClick={() => handleOAuth('apple')} className='flex items-center justify-center px-6 py-3 border 
-                    border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition duration-300 focus:outline-none'>
+                    <button onClick={() => handleOAuth('apple')}
+                    className='flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+                    disabled={loading}>
                         <img src={appleIcon} alt="Apple" className='h-5 w-5 mr-2' />
                         Apple
                     </button>

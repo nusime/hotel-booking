@@ -14,15 +14,17 @@ const ManageAccount = () => {
 
     const [message, setMessage] = useState({ text: "", type: "" });
     const [confirmDelete, setConfirmDelete] = useState('');
-    const [showVerifyBox, setShowVerifyBox] = useState(false);
-    const [otp, setOtp] = useState('');
-    const [isVerified, setIsVerified] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!user) return;
-        setFirstName(user.firstName || '');
-        setLastName(user.lastName || '');
+        
+        // Try to get firstName and lastName from multiple sources
+        const userFirstName = user.firstName || user.unsafeMetadata?.firstName || '';
+        const userLastName = user.lastName || user.unsafeMetadata?.lastName || '';
+        
+        setFirstName(userFirstName);
+        setLastName(userLastName);
     }, [user])
 
     if (!user) return <p>Loading...</p>
@@ -38,25 +40,69 @@ const ManageAccount = () => {
             const trimmedFirst = firstName?.trim() || '';
             const trimmedLast = lastName?.trim() || '';
 
-            const noChange = trimmedFirst === (user.firstName || '')
-            && trimmedLast === (user.lastName || '');
+            const currentFirstName = user.firstName || user.unsafeMetadata?.firstName || '';
+            const currentLastName = user.lastName || user.unsafeMetadata?.lastName || '';
+            
+            const noChange = trimmedFirst === currentFirstName && trimmedLast === currentLastName;
 
             if (noChange) {
                 showMessage('No changes detected on your profile', 'info');
                 return;
             }
 
+            // Check account type and provide specific guidance
+            const isOAuthAccount = user?.externalAccounts?.length > 0;
+            const hasPassword = user?.passwordEnabled;
+            const oauthProviders = user?.externalAccounts?.map(acc => acc.provider).join(', ') || '';
+
+            if (isOAuthAccount && !hasPassword) {
+                showMessage(`This account was created using ${oauthProviders}. Profile updates must be done through your ${oauthProviders} account settings, then refresh this page.`, 'error');
+                return;
+            }
+
             setLoading(true);
 
-            await user.update({
-                first_name: trimmedFirst || undefined,
-                last_name: trimmedLast || undefined
-            });
+            // Try updating using unsafeMetadata as fallback
+            try {
+                await user.update({
+                    unsafeMetadata: {
+                        ...user.unsafeMetadata,
+                        firstName: trimmedFirst,
+                        lastName: trimmedLast
+                    }
+                });
+                await user.reload();
+                showMessage('Profile updated successfully in metadata', 'success');
+            } catch (metadataError) {
+                // If metadata update fails, try direct field update
+                try {
+                    const updateData = {};
+                    if (trimmedFirst !== currentFirstName) updateData.firstName = trimmedFirst || null;
+                    if (trimmedLast !== currentLastName) updateData.lastName = trimmedLast || null;
 
-            showMessage('Profile updated successfully', 'success');
+                    if (Object.keys(updateData).length > 0) {
+                        await user.update(updateData);
+                        await user.reload();
+                        showMessage('Profile updated successfully', 'success');
+                    }
+                } catch (directError) {
+                    throw directError;
+                }
+            }
         } catch (error) {
-            console.error('Update profile error', error);
-            showMessage('Failed to update profile', 'error');
+            console.error('Update profile error:', error);
+            
+            // Provide specific error messages and solutions
+            const isOAuthAccount = user?.externalAccounts?.length > 0;
+            const oauthProviders = user?.externalAccounts?.map(acc => acc.provider).join(', ') || 'social login';
+            
+            if (isOAuthAccount) {
+                showMessage(`Profile updates are restricted for ${oauthProviders} accounts. Please update your name in your ${oauthProviders} account settings, then sign out and sign back in to see the changes here.`, 'error');
+            } else if (error.message?.includes('not a valid parameter') || error.status === 422) {
+                showMessage('Profile updates are currently disabled for this account. This may be due to your Clerk configuration settings. Contact support if you need to update your profile.', 'error');
+            } else {
+                showMessage('Failed to update profile. Please try again later or contact support.', 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -69,68 +115,137 @@ const ManageAccount = () => {
             showMessage("Password updates are not available for this account.", "error");
             return;
             }
-            await user.updatePassword({ newPassword: newPassword });
+
+            if (!currentPassword.trim()) {
+                showMessage("Please enter your current password", "error");
+                return;
+            }
+
+            if (!newPassword.trim()) {
+                showMessage("Please enter a new password", "error");
+                return;
+            }
+
+            if (currentPassword === newPassword) {
+                showMessage("New password must be different from current password", "error");
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showMessage("New password must be at least 8 characters long", "error");
+                return;
+            }
+
+            setLoading(true);
+
+            // Use Clerk's updatePassword method with current password verification
+            await user.updatePassword({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            });
+
             showMessage("Password updated successfully", "success");
+            setCurrentPassword("");
             setNewPassword("");
 
         } catch (error) {
             console.error(error);
-            showMessage(' Failed to update password', 'error');
+            if (error.errors && error.errors.length > 0) {
+                const errorCode = error.errors[0].code;
+                const errorMessage = error.errors[0].longMessage || error.errors[0].message;
+                
+                if (errorCode === 'session_reverification_required') {
+                    showMessage('For security, please sign out and sign back in, then try changing your password again.', 'error');
+                } else if (errorMessage.toLowerCase().includes('current') || errorMessage.toLowerCase().includes('incorrect') || errorMessage.toLowerCase().includes('invalid')) {
+                    showMessage('Current password does not match', 'error');
+                } else if (errorMessage.toLowerCase().includes('password')) {
+                    showMessage(errorMessage, 'error');
+                } else {
+                    showMessage('Failed to update password', 'error');
+                }
+            } else if (error.message?.includes('current_password') || error.message?.includes('incorrect') || error.message?.includes('invalid')) {
+                showMessage('Current password does not match', 'error');
+            } else if (error.message?.includes('reverification')) {
+                showMessage('For security, please sign out and sign back in, then try changing your password again.', 'error');
+            } else {
+                showMessage('Failed to update password', 'error');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleDeleteAccount = async () => {
-        if (confirmDelete !== "delete account") return;
+        console.log("handleDeleteAccount called");
+        console.log("confirmDelete:", confirmDelete);
+        console.log("user:", user);
 
-        try {
-        const emailAddress = user?.primaryEmailAddress;
-        if (!emailAddress) throw new Error("No primary email found.");
-        await emailAddress.prepareVerification({ strategy: "email_code" });
-
-        setShowVerifyBox(true);
-        showMessage("📩 Verification code sent to your email", "info");
-
-        } catch (err) {
-        console.error(err);
-        showMessage("Failed to send verification code", "error");
-        } finally {
-            setConfirmDelete('');
+        if (confirmDelete !== "delete account") {
+            console.log("Confirmation text doesn't match");
+            return;
         }
-    };
 
-    const handleVerifyCode = async () => {
-        try {
-        const emailAddress = user?.primaryEmailAddress;
-        if (!emailAddress) throw new Error("No primary email found.");
-
-        await emailAddress.attemptVerification({ code: otp });
-
-        setIsVerified(true);
-        showMessage("Email is verified. You can now delete account.", "success");
-        } catch (err) {
-        console.error(err);
-        showMessage("Invalid code. Try again.", "error");
-        } finally {
-            setOtp('');
+        if (!user || !user.id) {
+            console.log("No user or user.id found");
+            showMessage("User not found. Please refresh the page.", "error");
+            return;
         }
-    };
 
-    const handleFinalDelete = async () => {
         try {
+            setLoading(true);
+            showMessage("Deleting account...", "info");
 
-            const res = await fetch("/api/delete-user", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: user.id }),
-            });
+            console.log("Attempting to delete user:", user.id);
 
-            if (!res.ok) throw new Error("Failed to delete user");
+            // Call server endpoint to delete user using Clerk admin API
+            console.log("Making fetch request to http://localhost:3000/api/delete-user");
+            let response;
+            try {
+                response = await fetch('http://localhost:3000/api/delete-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: user.id }),
+                });
+                console.log("Response received:", response);
+            } catch (networkError) {
+                console.error("Network error:", networkError);
+                throw new Error("Unable to connect to server. Please check if the server is running.");
+            }
 
+            console.log("Response status:", response.status);
+            console.log("Response ok:", response.ok);
+
+            let result;
+            try {
+                result = await response.json();
+                console.log("Response result:", result);
+            } catch (parseError) {
+                console.error("JSON parse error:", parseError);
+                throw new Error("Invalid response from server");
+            }
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Failed to delete account');
+            }
+
+            console.log("User deleted successfully from server");
+
+            // Sign out after successful deletion
             await signOut();
+
+            console.log("User signed out, redirecting to home");
+
+            // Redirect to home page
             window.location.href = "/";
         } catch (err) {
-            console.error(err);
-            showMessage("Failed to delete account", "error");
+            console.error("Delete account error:", err);
+
+            // Show error message
+            showMessage(err.message || "Failed to delete account. Please try again.", "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -212,17 +327,33 @@ const ManageAccount = () => {
                 className="space-y-4"
                 >
                     <h3 className="text-lg font-semibold">Change Password</h3>
-                    <input 
+                    <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Current Password"
+                    required />
+                    <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg"
-                    placeholder="New Password" />
+                    placeholder="New Password (min 8 characters)"
+                    required />
                     <button
                     type="submit"
-                    className="w-full bg-[#54201c] text-white py-2 rounded-lg"
+                    className="w-full bg-[#54201c] text-white py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    disabled={loading}
                     >
-                        Change Password
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Updating Password...
+                            </>
+                        ) : (
+                            'Change Password'
+                        )}
                     </button>
                 </form>
 
@@ -239,55 +370,32 @@ const ManageAccount = () => {
                 <div>
                     <h3 className="text-lg font-semibold text-red-600">Delete Account</h3>
                     <p className="text-sm text-gray-600 mb-2">
-                        This action is permanent and cannot be undone.
+                        This action is permanent and cannot be undone. Your account will be completely deleted.
                     </p>
-                    <input 
+                    <input
                     type="text"
                     value={confirmDelete}
                     onChange={(e) => setConfirmDelete(e.target.value)}
                     placeholder='Type "delete account" to confirm'
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className="w-full px-4 py-2 border rounded-lg mb-3"
                     />
                     <button
-                    onClick={handleDeleteAccount}
-                    className="w-full mt-2 bg-red-600 text-white py-2 rounded-lg"
-                    disabled={confirmDelete !== 'delete account'}
+                    onClick={() => {
+                        console.log("Delete button clicked");
+                        handleDeleteAccount();
+                    }}
+                    className="w-full bg-red-600 text-white py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    disabled={confirmDelete !== 'delete account' || loading}
                     >
-                        Send Verification Code
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Deleting Account...
+                            </>
+                        ) : (
+                            'Delete Account Permanently'
+                        )}
                     </button>
-
-                    {/* Verification popup */}
-                    {showVerifyBox && (
-                        <div className="mt-4 p-4 border border-yellow-500 rounded-lg bg-yellow-50">
-                            {!isVerified ? (
-                                <>
-                                    <p className="text-yellow-800">
-                                        Enter the 6-digit code sent to your email:
-                                        <strong>{user?.primaryEmailAddress?.emailAddress}</strong>
-                                    </p>
-                                    <input 
-                                    type="text"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    className="w-full mt-2 px-4 py-2 border rounded-lg"
-                                    maxLength={6} 
-                                    placeholder="Enter verification code"
-                                    />
-                                    <button onClick={handleVerifyCode}
-                                    className="mt-3 bg-[#54201c] text-white py-2 px-4 rounded w-full">
-                                        Verify Code
-                                    </button>
-                                </>
-                            ) : (
-                                <button
-                                onClick={handleFinalDelete}
-                                className="mt-3 bg-red-600 text-white py-2 px-4 rounded w-full"
-                                >
-                                    Permenantly Delete Account
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
         )}

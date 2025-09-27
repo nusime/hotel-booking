@@ -10,7 +10,7 @@ const SsoCallback = () => {
         const completeSignIn = async () => {
             try {
                 await handleRedirectCallback();
-                navigate('/dashboard');
+                navigate('/');
             } catch (err) {
                 console.error("OAuth callback error:", err);
                 navigate('/login');

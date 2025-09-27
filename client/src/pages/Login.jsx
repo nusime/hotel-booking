@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-react';
+import React, { useState, useEffect } from 'react';
+import { useSignIn, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logos.jpg';
 import loginImg from '../assets/loginImg.png';
@@ -8,12 +8,20 @@ import appleIcon from '../assets/appleIcon.png';
 
 const Login = () => {
     const { isLoaded, signIn, setActive } = useSignIn();
+    const { user } = useUser();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     const [ emailAddress, setEmailAddress ] = useState('');
     const [ password, setPassword ] = useState('');
     const [ error, setError ] = useState('');
     const [ showPassword, setShowPassword ] = useState(false);
+    const [ loading, setLoading ] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,6 +31,8 @@ const Login = () => {
             return;
         }
 
+        setLoading(true);
+
         try {
             const result = await signIn.create({
                 identifier: emailAddress,
@@ -30,7 +40,7 @@ const Login = () => {
             });
             if (result.status === 'complete' && result.createdSessionId) {
                 await setActive({session: result.createdSessionId});
-                navigate('/dashboard');
+                navigate('/');
             } else {
                 setError('Login failed. Please check your credentials')
             }
@@ -41,6 +51,8 @@ const Login = () => {
             } else {
                 setError('An unexpected error occurred during login.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -49,16 +61,18 @@ const Login = () => {
             return;
         }
         setError('');
+        setLoading(true);
 
         try {
-            await signIn.authenticateWithRedirect({ 
+            await signIn.authenticateWithRedirect({
                 strategy: `oauth_${strategy}`,
                 redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/dashboard'
+                redirectUrlComplete: '/'
             });
         } catch (err) {
             console.error(`Error with ${strategy} sign in:`, JSON.stringify(err, null, 2));
             setError(`Failed to sign in with ${strategy}. Please try again.`);
+            setLoading(false);
         }
     };
 
@@ -151,11 +165,18 @@ const Login = () => {
                             Forgot Password?
                         </a>
                     </div>
-                    <button type='submit' 
-                    className='w-full bg-[#316E6A] text-white py-3 rounded-lg font-semibold transition duration-300 focus:outline-none'
-                    disabled={!isLoaded}
+                    <button type='submit'
+                    className='w-full bg-[#316E6A] text-white py-3 rounded-lg font-semibold transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center'
+                    disabled={!isLoaded || loading}
                     >
-                        Login
+                        {loading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Signing In...
+                            </>
+                        ) : (
+                            'Login'
+                        )}
                     </button>
                 </form>
 
@@ -176,13 +197,13 @@ const Login = () => {
                 </div>
                 <div className='flex space-x-4 justify-center'>
                     <button onClick={() => handleOAuth('google')}
-                    className='flex items-center justify-center px-6 py-3 border border-gray-300
-                    rounded-lg hover:bg-gray-50 transition duration-300 focus:outline-none'>
+                    className='flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+                    disabled={loading}>
                         <img src={googleIcon} alt="Google" className='w-5 h-5 mr-2' />
                     </button>
                     <button onClick={() => handleOAuth('apple')}
-                    className='flex items-center justify-center px-6 py-3 border border-gray-300
-                    rounded-lg hover:bg-gray-50 transition duration-300 focus:outline-none'>
+                    className='flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+                    disabled={loading}>
                         <img src={appleIcon} alt="Apple" className='w-5 h-5 mr-2' />
                     </button>
                 </div>

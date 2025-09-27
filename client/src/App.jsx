@@ -1,9 +1,10 @@
 import React from 'react';
 import Navbar from './components/Navbar';
-import { BrowserRouter as Router ,Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import VerifyEmail from './pages/VerifyEmail';
 import Footer from './components/Footer';
 import AllRooms from './pages/AllRooms';
 import RoomDetails from './pages/RoomDetails';
@@ -16,19 +17,21 @@ import AddRoom from './pages/hotelOwner/AddRoom';
 import ListRoom from './pages/hotelOwner/ListRoom';
 import ManageAccount from './pages/ManageAccount';
 
-const App = () => {
-
-  const isOwnerPath = useLocation().pathname.includes('owner');
+const AppContent = () => {
+  const location = useLocation();
+  const isOwnerPath = location.pathname.includes('owner');
+  const isAuthPath = ['/login', '/signup', '/verify-email', '/sso-callback'].includes(location.pathname);
 
   return (
     <div>
-      {!isOwnerPath && <Navbar />}
+      {!isOwnerPath && !isAuthPath && <Navbar />}
       {false && <HotelReg />}
-      <div className='min-h-[70vh]'>
+      <div className={isAuthPath ? '' : 'min-h-[70vh]'}>
         <Routes>
           <Route path='/' element={<Home/>}/>
           <Route path='/login' element={<Login/>}/>
           <Route path="/signup" element={<Signup />}/>
+          <Route path="/verify-email" element={<VerifyEmail />}/>
           <Route path="/sso-callback" element={<SsoCallback />} />
           <Route path="/rooms" element={<AllRooms />}/>
           <Route path="/rooms/:id" element={<RoomDetails />}/>
@@ -41,9 +44,13 @@ const App = () => {
           <Route path="/account" element={<ManageAccount />} />
         </Routes>
       </div>
-      <Footer />
+      {!isAuthPath && <Footer />}
     </div>
   )
+}
+
+const App = () => {
+  return <AppContent />;
 }
 
 export default App;

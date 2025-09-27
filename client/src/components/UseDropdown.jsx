@@ -46,7 +46,7 @@ const UserDropdown = () => {
                 )}
 
                 <span className="text-sm text-white font-medium">
-                    Hi, {user?.firstName || 'User'}
+                    Hi, {user?.firstName || user?.unsafeMetadata?.firstName || 'User'}
                 </span>
             </div>
 
@@ -61,7 +61,7 @@ const UserDropdown = () => {
                         />
                         <div>
                             <p className="text-sm font-semibold text-gray-800">
-                                {user?.firstName} {user?.lastName}
+                                {user?.firstName || user?.unsafeMetadata?.firstName || ''} {user?.lastName || user?.unsafeMetadata?.lastName || ''}
                             </p>
                             <p className='text-xs text-gray-500'>
                                 {user?.primaryEmailAddress?.emailAddress}
