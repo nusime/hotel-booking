@@ -1,5 +1,8 @@
 import User from "../models/User.js";
 import { Webhook } from "svix";
+import { createClerkClient } from '@clerk/clerk-sdk-node';
+
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 const clerkWebhooks = async (req, res) => {
     try {
@@ -22,7 +25,7 @@ const clerkWebhooks = async (req, res) => {
 
         const userData = {
             _id: data.id,
-            email: data.email_addresses[0].email_addresses,
+            email: data.email_addresses[0].email_address,
             username: data.first_name + ' ' + data.last_name,
             image: data.image_url,
         }
@@ -54,4 +57,28 @@ const clerkWebhooks = async (req, res) => {
     }
 }
 
+// Endpoint to delete user account
+const deleteUserAccount = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: 'User ID is required' });
+        }
+
+        console.log('Deleting user account:', userId);
+
+        // Delete user from Clerk using admin API
+        await clerkClient.users.deleteUser(userId);
+
+        console.log('User deleted successfully from Clerk');
+
+        res.json({ success: true, message: 'User account deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user account:', error);
+        res.status(500).json({ success: false, message: error.message || 'Failed to delete user account' });
+    }
+};
+
+export { deleteUserAccount };
 export default clerkWebhooks;
