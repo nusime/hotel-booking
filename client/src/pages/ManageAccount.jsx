@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/clerk-react";
 
 const ManageAccount = () => {
@@ -6,42 +6,59 @@ const ManageAccount = () => {
     const { signOut } = useClerk();
     
     const [tab, setTab] = useState('profile');
-    const [firstName, setFirstName] = useState(user?.firstName || '');
-    const [lastName, setLastName] = useState(user?.lastName || '');
-    const [password, setPassword] = useState('');
+
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+
     const [message, setMessage] = useState({ text: "", type: "" });
     const [confirmDelete, setConfirmDelete] = useState('');
     const [showVerifyBox, setShowVerifyBox] = useState(false);
     const [otp, setOtp] = useState('');
     const [isVerified, setIsVerified] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+        setFirstName(user.firstName || '');
+        setLastName(user.lastName || '');
+    }, [user])
 
     if (!user) return <p>Loading...</p>
 
-    const showMessage = (text, type='success') => {
+    const showMessage = (text, type='success', duration = 4000) => {
         setMessage({text, type});
-        setTimeout(() => setMessage({text: "", type: ""}), 4000);
+        if (duration > 0) setTimeout(() => setMessage({text: "", type: ""}), duration);
     };
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         try {
-            const payload = {};
-            if (firstName && firstName.trim()) payload.firstName = firstName.trim();
-            if (lastName && lastName.trim()) payload.lastName = lastName.trim();
+            const trimmedFirst = firstName?.trim() || '';
+            const trimmedLast = lastName?.trim() || '';
 
-            if (Object.keys(payload).length === 0) {
-                showMessage("Please enter a first or last name", "error");
+            const noChange = trimmedFirst === (user.firstName || '')
+            && trimmedLast === (user.lastName || '');
+
+            if (noChange) {
+                showMessage('No changes detected on your profile', 'info');
                 return;
             }
 
+            setLoading(true);
+
             await user.update({
-                firstName: firstName.trim() || undefined,
-                lastName: lastName.trim() || undefined
+                first_name: trimmedFirst || undefined,
+                last_name: trimmedLast || undefined
             });
+
             showMessage('Profile updated successfully', 'success');
         } catch (error) {
-            console.error(error);
+            console.error('Update profile error', error);
             showMessage('Failed to update profile', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -52,9 +69,9 @@ const ManageAccount = () => {
             showMessage("Password updates are not available for this account.", "error");
             return;
             }
-            await user.updatePassword({ newPassword: password });
+            await user.updatePassword({ newPassword: newPassword });
             showMessage("Password updated successfully", "success");
-            setPassword("");
+            setNewPassword("");
 
         } catch (error) {
             console.error(error);
@@ -197,8 +214,8 @@ const ManageAccount = () => {
                     <h3 className="text-lg font-semibold">Change Password</h3>
                     <input 
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg"
                     placeholder="New Password" />
                     <button
