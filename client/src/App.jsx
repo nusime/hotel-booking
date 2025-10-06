@@ -16,16 +16,20 @@ import Dashboard from './pages/hotelOwner/Dashboard';
 import AddRoom from './pages/hotelOwner/AddRoom';
 import ListRoom from './pages/hotelOwner/ListRoom';
 import ManageAccount from './pages/ManageAccount';
+import { Toaster } from 'react-hot-toast';
+import { useAppContext } from './context/AppContext';
 
 const AppContent = () => {
   const location = useLocation();
   const isOwnerPath = location.pathname.includes('owner');
   const isAuthPath = ['/login', '/signup', '/verify-email', '/sso-callback'].includes(location.pathname);
+  const {showHotelReg} = useAppContext();
 
   return (
     <div>
+      <Toaster />
       {!isOwnerPath && !isAuthPath && <Navbar />}
-      {false && <HotelReg />}
+      {showHotelReg && <HotelReg />}
       <div className={isAuthPath ? '' : 'min-h-[70vh]'}>
         <Routes>
           <Route path='/' element={<Home/>}/>
