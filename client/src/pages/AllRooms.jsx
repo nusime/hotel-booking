@@ -96,7 +96,7 @@ const AllRooms = () => {
                   ))}
                 </div>
                 <p className='text-xl font-medium text-gray-700'>
-                  Birr ${room.pricePerNight} /night
+                  Birr {room.pricePerNight} /night
                 </p>
               </div>
             </div>

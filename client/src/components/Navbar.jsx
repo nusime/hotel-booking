@@ -1,32 +1,36 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation, NavLink, useNavigate, Link } from 'react-router-dom';
+import {useLocation, NavLink, Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useClerk } from '@clerk/clerk-react';
 import UserDropdown from './useDropdown.jsx';
+import { useAppContext } from '../context/AppContext.jsx';
 
 
 const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Hotels', path: '/rooms' },
-        { name: 'Experience', path: '/' },
-        { name: 'About', path: '/' },
+        { name: 'Experience', path: '/experience' },
+        { name: 'About', path: '/about' },
     ];
 
 
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-    const { user } = useUser();
     const { signOut } = useClerk();
-    const navigate = useNavigate();
     const location = useLocation();
-    const isLoginPage = location.pathname === '/login';
 
-    const hideNavbar = location.pathname === '/login' || location.pathname === '/signup';
-    if (hideNavbar) {
-        return null; // Don't render the Navbar on login or signup pages
-    }
+    const isLoginPage = location.pathname === '/login' || location.pathname === '/signup';
+    if (isLoginPage) return null;
+
+
+    const { user, navigate, isOwner, setShowHotelReg} = useAppContext();
+
+    useEffect(() => {
+        setIsMenuOpen(false);   
+    }, [location.pathname]);
 
 
     useEffect(() => {
@@ -67,17 +71,28 @@ const Navbar = () => {
                             <div className= 'h-0.5 w-0 group-hover:w-full transition-all duration-300' />
                         </NavLink>
                     ))}
-                    <Link to='/dashboard'>
-                        <button className= 'border px-4 py-1 text-sm font-light rounded-full cursor-pointer text-white transition-all'>
-                            Dashboard
-                        </button>
-                    </Link>
-                    
+                    {user && (
+                            <button className= {`border px-4 py-1 text-sm font-light rounded-full cursor-pointer 
+                            text-white transition-all`}
+                            onClick={() => isOwner ? navigate('/owner') : setShowHotelReg(true)}>
+                                {isOwner ? 'Dashboard' : 'List Your Hotel'}
+                            </button>
+                        
+                        )
+                    }
                 </div>
 
                 {/* Desktop Right */}
                 <div className="hidden md:flex items-center gap-4">
-                    <img src={assets.searchIcon} alt="Search icon image" className= 'h-7 transition-all duration-500' />
+                    <button
+                    onClick={() => setIsSearchOpen(true)}
+                    >
+                        <img src={assets.searchIcon} 
+                        alt="Search icon image" 
+                        className= 'h-7 transition-all duration-500' 
+                        />
+                    </button>
+
 
                     {!isLoginPage && ( user? (
                         <UserDropdown />
@@ -94,17 +109,26 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <div className="flex items-center gap-3 md:hidden">
-                    <img onClick={()=> setIsMenuOpen(!isMenuOpen)} 
-                    src={assets.menuIcon} alt="" 
-                    className={`${isScrolled && 'invert'}`} />
+                    <img 
+                    onClick={()=> setIsMenuOpen(!isMenuOpen)} 
+                    src={assets.menuIcon} 
+                    alt="Menu" 
+                    className={isScrolled ? 'invert' : ''} 
+                    />
                 </div>
 
+                
+
                 {/* Mobile Menu */}
-                <div className={`fixed top-0 left-0 w-full h-screen bg-white text-base 
-                flex flex-col md:hidden items-center justify-center gap-6 font-medium text-gray-800 transition-all duration-500 
+                <div className={`fixed top-0 left-0 w-full h-screen bg-[#54201c] text-base 
+                flex flex-col md:hidden items-center justify-center gap-6 font-medium text-white transition-all duration-500 
                     ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                    <button className="absolute top-4 right-4" onClick={() => setIsMenuOpen(false)}>
-                        <img src={assets.closeIcon} alt="close-menu" className="h-[26px]"/>
+                    <button className="absolute top-4 right-4" 
+                    onClick={() => setIsMenuOpen(false)}>
+                        <img src={assets.closeIcon} 
+                        alt="close-menu" 
+                        className="h-[26px]"
+                        />
                     </button>
 
                     {navLinks.map((link, i) => (
@@ -117,9 +141,15 @@ const Navbar = () => {
                         </NavLink>
                     ))}
 
-                    <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                        Dashboard
-                    </Link>
+                    {user && (
+                            <button className= {`border px-4 py-1 text-sm font-light rounded-full cursor-pointer 
+                            text-white transition-all`}
+                            onClick={() => isOwner ? navigate('/owner') : setShowHotelReg(true)}>
+                                {isOwner ? 'Dashboard' : 'List Your Hotel'}
+                            </button>
+                        
+                        )
+                    }
 
                     {!isLoginPage && ( user? (
                         <button onClick={() => signOut()}
