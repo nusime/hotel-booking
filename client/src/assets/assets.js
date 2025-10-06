@@ -25,7 +25,7 @@ import locationFilledIcon from './locationFilledIcon.svg'
 import heartIcon from './heartIcon.svg'
 import badgeIcon from './badgeIcon.svg'
 import menuIcon from './menuIcon.svg'
-// import closeMenu from './closeMenu.svg'
+import closeMenu from './closeMenu.svg'
 import guestsIcon from './guestsIcon.svg'
 import roomImg1 from './roomImg1.png'
 import roomImg2 from './roomImg2.png'
@@ -42,6 +42,9 @@ import listIcon from "./listIcon.svg";
 import uploadArea from "./uploadArea.svg";
 import totalBookingIcon from "./totalBookingIcon.svg";
 import totalRevenueIcon from "./totalRevenueIcon.svg";
+import nazriImg from "./nazri.jpg";
+import hikmiImg from "./hikmi.jpg";
+import tsitaImg from "./tsita.jpg";
 
 
 export const assets = {
@@ -72,7 +75,7 @@ export const assets = {
     heartIcon,
     badgeIcon,
     menuIcon,
-    // closeMenu,
+    closeMenu,
     guestsIcon,
     regImage,
     addIcon,
@@ -84,24 +87,40 @@ export const assets = {
 }
 
 export const cities = [
-    "Dubai",
-    "Singapore",
-    "New York",
-    "London",
+    "Addis Ababa",
+    "Harar",
+    "Dire Dawa",
+    "Hawasa",
+    "Bahir Dar",
 ];
 
 // Exclusive Offers Dummy Data
 export const exclusiveOffers = [
-    { _id: 1, title: "Summer Escape Package", description: "Enjoy a complimentary night and daily breakfast", priceOff: 25, expiryDate: "Aug 31", image: exclusiveOfferCardImg1 },
-    { _id: 2, title: "Romantic Getaway", description: "Special couples package including spa treatment", priceOff: 20, expiryDate: "Sep 20", image: exclusiveOfferCardImg2 },
-    { _id: 3, title: "Luxury Retreat", description: "Book 60 days in advance and save on your stay at any of our luxury properties worldwide.", priceOff: 30, expiryDate: "Sep 25", image: exclusiveOfferCardImg3 },
+    { _id: 1, title: "Hilton Addis Ababa Escape",
+     description: "Enjoy a 2-night stay with complimentary breakfast and pool access in the heart of the city.",
+     priceOff: 25, 
+     expiryDate: "Aug 31", 
+     image: exclusiveOfferCardImg1 
+    },
+    { _id: 2, title: "Hyatt Regency Addis Luxury Offer",
+     description: "Book early and save up to 30% on deluxe rooms with spa and wellness access.", 
+     priceOff: 20, 
+     expiryDate: "Sep 20", 
+     image: exclusiveOfferCardImg2 
+    },
+    { _id: 3, title: "Skylight Hotel Business Special", 
+     description: "Stay 3 nights and get 1 free — includes airport shuttle and rooftop dinner discount.", 
+     priceOff: 30, 
+     expiryDate: "Sep 25", 
+     image: exclusiveOfferCardImg3 
+    },
 ];
 
 // Testimonials Dummy Data
 export const testimonials = [
-    { id: 1, name: "Emma Rodriguez", address: "Barcelona, Spain", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200", rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that QuickStay provides." },
-    { id: 2, name: "Liam Johnson", address: "New York, USA", image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200", rating: 4, review: "QuickStay exceeded my expectations. The booking process was seamless, and the hotels were absolutely top-notch. Highly recommended!" },
-    { id: 3, name: "Sophia Lee", address: "Seoul, South Korea", image: "https://images.unsplash.com/photo-1701615004837-40d8573b6652?q=80&w=200", rating: 5, review: "Amazing service! I always find the best luxury accommodations through QuickStay. Their recommendations never disappoint!" }
+    { id: 1, name: "Tsion Worku", address: "Addis Ababa, Ethiopia", image: tsitaImg, rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that QuickStay provides." },
+    { id: 2, name: "Nazrawit Habtewold", address: "Hawasa, Ethiopia", image: nazriImg, rating: 4, review: "QuickStay exceeded my expectations. The booking process was seamless, and the hotels were absolutely top-notch. Highly recommended!" },
+    { id: 3, name: "Hikma Jemal", address: "Jijiga, Ethiopia", image: hikmiImg, rating: 5, review: "Amazing service! I always find the best luxury accommodations through QuickStay. Their recommendations never disappoint!" }
 ];
 
 // // Facility Icon
