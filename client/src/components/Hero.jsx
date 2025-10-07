@@ -1,7 +1,29 @@
 import React from 'react'
 import { assets, cities } from '../assets/assets';
+import { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
 
 const Hero = () => {
+  const {navigate, getToken, axios, setSearchedCities} = useAppContext();
+  const [destination, setDestitation] = useState('');
+
+  const onSearch = async (e) => {
+    e.preventDefault();
+    navigate(`/rooms?destination=${destination}`);
+    // Call api to save recent searched City
+    await axios.post('/api/user/recent-searched-cities', {recentSearchedCity: destination},
+      {headers: {Authorization: `Bearer ${await getToken()}`}});
+
+    // Add destination to searchedCities max 3 recent searched cities
+    setSearchedCities((prevSearchedCities) => {
+      const updatedSearchedCities = [...prevSearchedCities, destination];
+      if (updatedSearchedCities.length > 3) {
+        updatedSearchedCities.shift();
+      }
+      return updatedSearchedCities;
+    })
+  }
+
   return (
     
     <div className='relative z-20 flex flex-col items-start justify-center px-6
@@ -23,7 +45,8 @@ const Hero = () => {
           stay graceful, stay with us.
       </p>
         
-      <form className='bg-white text-gray-500 rounded-lg px-6 py-4 mt-8 
+      <form onSubmit={onSearch}
+      className='bg-white text-gray-500 rounded-lg px-6 py-4 mt-8 
       flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto'>
 
         {/* {Destination Input} */}
@@ -33,7 +56,9 @@ const Hero = () => {
             <label htmlFor="destinationInput">Destination</label>
           </div>
 
-          <input 
+          <input
+          onChange={(e) => setDestitation(e.target.value)} 
+          value={destination}
           list='destinations' 
           id="destinationInput" 
           type="text" 
