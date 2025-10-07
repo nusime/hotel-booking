@@ -5,10 +5,13 @@ import Room from "../models/Room.js";
 // API to create a new room for a hotel
 export const createRoom = async (req, res) =>{
     try {
-        const {roomType, priceperNight, amenities} = req.body;
+        const {roomType, pricePerNight, amenities} = req.body;
         const hotel = await Hotel.findOne({owner: req.auth.userId});
 
         if(!hotel) return res.json({success: false, message: 'No hotel found'});
+
+        const price = +pricePerNight;
+        if (isNaN(price) || price <= 0) return res.json({success: false, message: 'Invalid price per night'});
 
         // upload images to cloudinary
         const uploadImages = req.files.map(async (file) => {
@@ -22,7 +25,7 @@ export const createRoom = async (req, res) =>{
         await Room.create({
             hotel: hotel._id,
             roomType,
-            pricePerNight: +priceperNight,
+            pricePerNight: price,
             amenities: JSON.parse(amenities),
             images
         });
@@ -53,8 +56,9 @@ export const getRooms = async (req, res) =>{
 export const getOwnerRooms = async (req, res) =>{
 
     try {
-        const hotelData = await Hotel({owner: req.auth.userId});
-        const rooms = await Room.find({hotel: hotelData._id.toString()}).populate('hotel');
+        const hotelData = await Hotel.findOne({owner: req.auth.userId});
+        if (!hotelData) return res.json({success: false, message: 'Hotel not found'});
+        const rooms = await Room.find({hotel: hotelData._id}).populate('hotel');
         res.json({success: true, rooms});
     } catch (error) {
         res.json({success: false, message: error.message});
