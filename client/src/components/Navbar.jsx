@@ -1,172 +1,166 @@
-import React, {useEffect, useState} from 'react';
-import {useLocation, NavLink, Link } from 'react-router-dom';
+// Navbar.jsx
+import React, { useEffect, useState } from 'react';
+import { useLocation, NavLink, Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import { useClerk } from '@clerk/clerk-react';
 import UserDropdown from './useDropdown.jsx';
 import { useAppContext } from '../context/AppContext.jsx';
 
-
 const Navbar = () => {
-    const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'Hotels', path: '/rooms' },
-        { name: 'Experience', path: '/experience' },
-        { name: 'About', path: '/about' },
-    ];
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Hotels', path: '/rooms' },
+    { name: 'Experience', path: '/experience' },
+    { name: 'About', path: '/about' },
+  ];
+
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const { signOut } = useClerk();
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  const { user, navigate, setShowHotelReg, isOwner, hasHotel } = useAppContext();
+
+  // Close mobile menu on route change
+  useEffect(() => setIsMenuOpen(false), [location.pathname]);
+
+  // Scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (location.pathname === '/') {
+        setIsScrolled(window.scrollY > 10);
+      } else {
+        setIsScrolled(true);
+      }
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
 
 
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
+  if (isLoginPage) return null;
 
-    const { signOut } = useClerk();
-    const location = useLocation();
+  return (
+    <nav
+      className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 text-white py-3 md:py-4 ${
+        isScrolled ? 'bg-[#54201c] backdrop-blur-md shadow-md' : 'bg-transparent'
+      }`}
+    >
+      {/* Logo */}
+      <Link to="/" className="flex items-center gap-1">
+        <img src={assets.logo} alt="logo" className="h-20 w-30" />
+      </Link>
 
-    const isLoginPage = location.pathname === '/login' || location.pathname === '/signup';
-    if (isLoginPage) return null;
-
-
-    const { user, navigate, isOwner, setShowHotelReg} = useAppContext();
-
-    useEffect(() => {
-        setIsMenuOpen(false);   
-    }, [location.pathname]);
-
-
-    useEffect(() => {
-
-         const handleScroll = () => {
-             if(location.pathname === '/'){
-                setIsScrolled(window.scrollY > 10);
-
-             } else {
-            setIsScrolled(true);
+      {/* Desktop Nav */}
+      <div className="hidden md:flex items-center gap-4 lg:gap-8">
+        {navLinks.map((link, i) => (
+          <NavLink
+            key={i}
+            to={link.path}
+            className={({ isActive }) =>
+              `group flex flex-col gap-0.5 ${
+                isActive ? 'underline underline-offset-4 font-semibold' : 'text-white'
+              }`
             }
-        };
-        handleScroll();
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [location.pathname]);
+          >
+            {link.name}
+            <div className="h-0.5 w-0 group-hover:w-full transition-all duration-300" />
+          </NavLink>
+        ))}
 
-    return (
+        {/* List/Dashboard button */}
+        {user && isOwner && (
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer text-white transition-all"
+            onClick={() => (hasHotel ? navigate('/owner') : setShowHotelReg(true))}
+          >
+            {hasHotel ? 'Dashboard' : 'List Your Hotel'}
+          </button>
+        )}
+      </div>
 
-            <nav className={`fixed top-0 left-0 w-full 
-            flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 
-            transition-all duration-500 z-50 text-white py-3 md:py-4 ${isScrolled? 'bg-[#54201c] backdrop-blur-md shadow-md': 'bg-transparent'}`}>
+      {/* Desktop Right */}
+      <div className="hidden md:flex items-center gap-4">
+        <button onClick={() => setIsSearchOpen(true)}>
+          <img src={assets.searchIcon} alt="Search icon" className="h-7 transition-all duration-500" />
+        </button>
 
-                {/* Logo */}
-                <Link to="/" className={`flex items-center gap-1`}>
-                    <img src={assets.logo} 
-                    alt="logo" className= 'h-20 w-30' />
-                </Link>
+        {user ? (
+          <UserDropdown />
+        ) : (
+          <Link to="/login">
+            <button className="bg-[#49B9FF]/50 text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
+              Login
+            </button>
+          </Link>
+        )}
+      </div>
 
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-4 lg:gap-8">
-                    {navLinks.map((link, i) => (
-                        <NavLink key={i} to={link.path} className= {({isActive}) =>
-                            `group flex flex-col gap-0.5 ${isActive?
-                            "underline underline-offset-4 font-semibold" : "text-white"
-                        } `}>
-                            {link.name}
-                            <div className= 'h-0.5 w-0 group-hover:w-full transition-all duration-300' />
-                        </NavLink>
-                    ))}
-                    {user && (
-                            <button className= {`border px-4 py-1 text-sm font-light rounded-full cursor-pointer 
-                            text-white transition-all`}
-                            onClick={() => isOwner ? navigate('/owner') : setShowHotelReg(true)}>
-                                {isOwner ? 'Dashboard' : 'List Your Hotel'}
-                            </button>
-                        
-                        )
-                    }
-                </div>
+      {/* Mobile Menu Button */}
+      <div className="flex items-center gap-3 md:hidden">
+        <img
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          src={assets.menuIcon}
+          alt="Menu"
+          className={isScrolled ? 'invert' : ''}
+        />
+      </div>
 
-                {/* Desktop Right */}
-                <div className="hidden md:flex items-center gap-4">
-                    <button
-                    onClick={() => setIsSearchOpen(true)}
-                    >
-                        <img src={assets.searchIcon} 
-                        alt="Search icon image" 
-                        className= 'h-7 transition-all duration-500' 
-                        />
-                    </button>
+      {/* Mobile Menu */}
+      <div
+        className={`fixed top-0 left-0 w-full h-screen bg-[#54201c] text-base flex flex-col md:hidden items-center justify-center gap-6 font-medium text-white transition-all duration-500 ${
+          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <button className="absolute top-4 right-4" onClick={() => setIsMenuOpen(false)}>
+          <img src={assets.closeIcon} alt="close-menu" className="h-[26px]" />
+        </button>
 
+        {navLinks.map((link, i) => (
+          <NavLink
+            key={i}
+            to={link.path}
+            onClick={() => setIsMenuOpen(false)}
+            className={({ isActive }) =>
+              `group flex flex-col gap-0.5 ${isActive ? 'underline font-semibold' : ''}`
+            }
+          >
+            {link.name}
+          </NavLink>
+        ))}
 
-                    {!isLoginPage && ( user? (
-                        <UserDropdown />
-                        ) : (
-                            <Link to='/login'>
-                                <button className="bg-[#49B9FF]/50 text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
-                                    Login
-                                </button>
-                            </Link>   
-                        )
-                    )}
-                    
-                </div>
+        {/* Mobile List/Dashboard button */}
+        {user && isOwner && (
+          <button
+            className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer text-white transition-all"
+            onClick={() => (hasHotel ? navigate('/owner') : setShowHotelReg(true))}
+          >
+            {hasHotel ? 'Dashboard' : 'List Your Hotel'}
+          </button>
+        )}
 
-                {/* Mobile Menu Button */}
-                <div className="flex items-center gap-3 md:hidden">
-                    <img 
-                    onClick={()=> setIsMenuOpen(!isMenuOpen)} 
-                    src={assets.menuIcon} 
-                    alt="Menu" 
-                    className={isScrolled ? 'invert' : ''} 
-                    />
-                </div>
+        {/* Mobile Login/Logout */}
+        {user ? (
+          <button
+            onClick={() => signOut()}
+            className="bg-red-600 text-white px-6 py-2.5 rounded-full ml-2 transition-all duration-500"
+          >
+            LogOut
+          </button>
+        ) : (
+          <Link to="/login">
+            <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
+              Login
+            </button>
+          </Link>
+        )}
+      </div>
+    </nav>
+  );
+};
 
-                
-
-                {/* Mobile Menu */}
-                <div className={`fixed top-0 left-0 w-full h-screen bg-[#54201c] text-base 
-                flex flex-col md:hidden items-center justify-center gap-6 font-medium text-white transition-all duration-500 
-                    ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                    <button className="absolute top-4 right-4" 
-                    onClick={() => setIsMenuOpen(false)}>
-                        <img src={assets.closeIcon} 
-                        alt="close-menu" 
-                        className="h-[26px]"
-                        />
-                    </button>
-
-                    {navLinks.map((link, i) => (
-                        <NavLink key={i} to={link.path} onClick={() => setIsMenuOpen(false)}
-                        className= {({isActive}) =>
-                            `group flex flex-col gap-0.5 ${isActive?
-                            "underline font-semibold" : ""
-                        } `}>
-                            {link.name}
-                        </NavLink>
-                    ))}
-
-                    {user && (
-                            <button className= {`border px-4 py-1 text-sm font-light rounded-full cursor-pointer 
-                            text-white transition-all`}
-                            onClick={() => isOwner ? navigate('/owner') : setShowHotelReg(true)}>
-                                {isOwner ? 'Dashboard' : 'List Your Hotel'}
-                            </button>
-                        
-                        )
-                    }
-
-                    {!isLoginPage && ( user? (
-                        <button onClick={() => signOut()}
-                        className='bg-red-600 text-white px-6 py-2.5 rounded-full ml-2 transition-all duration-500'>
-                            LogOut
-                        </button>
-                        ) : (
-                            <Link to='/login'>
-                                <button className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
-                                    Login
-                                </button>
-                            </Link>   
-                        )
-                    )}
-
-                </div>
-            </nav>
-    );
-}
 export default Navbar;

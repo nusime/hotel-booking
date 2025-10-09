@@ -1,10 +1,12 @@
 // Get /api/user
+import Hotel from "../models/Hotel.js";
 
 export const getUserData = async (req, res) => {
     try {
         const role = req.user.role;
         const recentSearchedCities = req.user.recentSearchedCities;
-        res.json({success: true, role, recentSearchedCities})
+        const hasHotel = await Hotel.findOne({ owner: req.user._id }) ? true : false;
+        res.json({success: true, role, recentSearchedCities, hasHotel})
     } catch (error) {
         res.json({success: false, message: error.message});
     }

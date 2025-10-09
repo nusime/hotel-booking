@@ -27,3 +27,12 @@ export const registerHotel = async (req, res) => {
         res.status(500).json({success: false, message: error.message});
     }
 }
+
+export const checkUserHasHotel = async (req, res) => {
+  try {
+    const hotel = await Hotel.findOne({ owner: req.user._id }); // or req.user.id depending on your auth
+    res.json({ hasHotel: !!hotel });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

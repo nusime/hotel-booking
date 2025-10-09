@@ -19,6 +19,7 @@ export const AppProvider = ({children}) => {
     const [showHotelReg, setShowHotelReg] = useState(false);
     const [searchedCities, setSearchedCities] = useState([]);
     const [rooms, setRooms] = useState([]);
+    const [hasHotel, setHasHotel] = useState(false);
 
     const fetchRooms = async () => {
         try {
@@ -43,6 +44,7 @@ export const AppProvider = ({children}) => {
             if (data.success){
                 setIsOwner(data.role === 'hotelOwner');
                 setSearchedCities(data.recentSearchedCities);
+                setHasHotel(data.hasHotel || false);
             } else {
                 // Retry fetching user details after 5 seconds
                 setTimeout(() => {
@@ -66,19 +68,21 @@ export const AppProvider = ({children}) => {
     }, []);
 
     const value = {
-        currency, 
-        navigate, 
-        user, 
-        getToken, 
-        isOwner, 
-        setIsOwner, 
+        currency,
+        navigate,
+        user,
+        getToken,
+        isOwner,
+        setIsOwner,
         axios,
         showHotelReg,
         setShowHotelReg,
         searchedCities,
         setSearchedCities,
         rooms,
-        setRooms
+        setRooms,
+        hasHotel,
+        setHasHotel
     };
 
     return (

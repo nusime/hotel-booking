@@ -103,7 +103,7 @@ const AllRooms = () => {
   const filterDestination = (room) => {
     const destination = searchParams.get('destination');
     if(!destination) return true;
-    return room.hotel.city.toLowerCase().includes(destination.toLowerCase());
+    return room.hotel?.city?.toLowerCase().includes(destination.toLowerCase());
   }
 
   // Filter and sort rooms based on the selected filters and sort option
@@ -138,7 +138,7 @@ const AllRooms = () => {
 
         {/* ROOMS LIST */}
         <div className='w-full lg:w-[75%]'>
-          {filteredRooms.map((room) => (
+          {filteredRooms.filter(room => room.hotel).map((room) => (
             <div key={room._id} className='flex flex-col md:flex-row items-start md:items-center py-10 gap-6 border-b border-gray-300 last:pb-30 last:border-0'>
               <img
                 onClick={() => { navigate(`/rooms/${room._id}`); scrollTo(0, 0); }}
@@ -148,12 +148,12 @@ const AllRooms = () => {
                 className='w-full md:w-1/2 h-[250px] rounded-xl shadow-lg object-cover cursor-pointer'
               />
               <div className='md:w-1/2 flex flex-col gap-2'>
-                <p className='text-gray-500'>{room.hotel.city}</p>
+                <p className='text-gray-500'>{room.hotel?.city}</p>
                 <p
                   onClick={() => { navigate(`/rooms/${room._id}`); scrollTo(0, 0); }}
                   className='text-gray-800 text-3xl font-playfair cursor-pointer'
                 >
-                  {room.hotel.name}
+                  {room.hotel?.name}
                 </p>
                 <div className='flex items-center'>
                   <StarRating />
@@ -161,7 +161,7 @@ const AllRooms = () => {
                 </div>
                 <div className='flex items-center gap-1 text-gray-500 mt-2 text-sm'>
                   <img src={assets.locationIcon} alt="location-icon" />
-                  <span>{room.hotel.address}</span>
+                  <span>{room.hotel?.address}</span>
                 </div>
                 <div className='flex flex-wrap items-center mt-3 mb-6 gap-4'>
                   {room.amenities.map((item, index) => (
